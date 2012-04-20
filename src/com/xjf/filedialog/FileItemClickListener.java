@@ -1306,7 +1306,10 @@ public class FileItemClickListener {
 						MimeTypeMap.getFileExtensionFromUrl(file));
 		if (type == null) {
 			String tmp = file.toLowerCase();
-			if (tmp.endsWith("mp3") || tmp.endsWith("wav") || tmp.endsWith("wma")) {
+			if (tmp.endsWith("png") || tmp.endsWith("bmp") || tmp.endsWith("jpg") ||
+					tmp.endsWith("jpeg")) {
+				type = "image/*";
+			} if (tmp.endsWith("mp3") || tmp.endsWith("wav") || tmp.endsWith("wma")) {
 				type = "audio/*";
 			} else if (tmp.endsWith("apk")) {
 				type = "application/vnd.android.package-archive";

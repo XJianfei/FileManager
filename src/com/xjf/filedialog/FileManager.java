@@ -326,7 +326,7 @@ public class FileManager extends Activity {
 	public boolean canWriteSystem() {return (mounts.perm[1].endsWith(Mounts.RW));}
 	//private boolean mountV = false;
 
-	public final static boolean D = false;
+	public final static boolean D = true;
 	public final static String tag = "FileDialog";
 	public static final void dbgf(String tag, String msg) {
 		if (D) {

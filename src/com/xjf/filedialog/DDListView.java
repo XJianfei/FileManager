@@ -9,16 +9,18 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.TranslateAnimation;
 import android.widget.ListView;
 import android.widget.TextView;
 /**
@@ -27,6 +29,8 @@ import android.widget.TextView;
 public class DDListView extends ListView  {
 	//private final static String tag = "FileDialog";
 
+	private static final boolean spring = true;
+	
 	private Context context;
 	private FileManager fileManager;
 	private android.view.WindowManager.LayoutParams mWindowParams;
@@ -174,7 +178,7 @@ public class DDListView extends ListView  {
 			//FileManager.dbg("smoll: " + smoll);
 			//smoothScrollBy(smoll, 100);
 
-			if (SDK8 && method != null)
+			if (SDK8 && method != null) {
 				try {
 					method.invoke(DDListView.this, dragCurPos);
 				} catch (IllegalArgumentException e) {
@@ -196,16 +200,146 @@ public class DDListView extends ListView  {
 					method = null;
 					setSelectionFromTop(dragCurPos, dragY);
 				}
-			else
+			} else {
 				setSelectionFromTop(dragCurPos, dragY);
+			}
 			if (!doTask) {
 				ha.removeMessages(0);
 			}
 		}
 	};
 
+
+	private boolean outBound = false;
+	private int distance;
+	private int firstOut;
 	
-	
+	GestureDetector mGestureDetector = new GestureDetector(context, 
+			new GestureDetector.OnGestureListener() {
+				
+				@Override
+				public boolean onSingleTapUp(MotionEvent e) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+				
+				@Override
+				public void onShowPress(MotionEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+						float distanceY) {
+					// TODO Auto-generated method stub
+					/**
+					if (parentView == null){
+						return false;
+					}/**/
+					/**
+					 *  弹性的实现, 主要用scrollTo(int x, int y)方法移动listView
+					 *  根据点击位置离listView的距离,不断地用scrollTo调整listView的位置.
+					 */
+					int firstPos = getFirstVisiblePosition();
+					int lastPos = getLastVisiblePosition();
+					int itemCount = getCount();
+
+					if (outBound && firstPos != 0
+							&& lastPos != (itemCount - 1)) {
+						scrollTo(0, 0);
+						//DDListView.this.computeScroll();
+						return false;
+					}
+					View firstView = getChildAt(firstPos);
+
+					if (!outBound)
+						firstOut = (int) e2.getRawY();
+					//在上面
+					if (firstView != null && (outBound || 
+							(firstPos == 0 && firstView.getTop() == 0 && distanceY < 0))){
+						
+						distance = firstOut - (int) e2.getRawY();
+						scrollTo(0, distance);
+						return true;
+					}
+
+					
+					if (lastPos != (itemCount - 1))
+						return false;
+					View lastView = getChildAt(lastPos - firstPos);
+					int GridHeight = getHeight();
+					/**
+					Log.d(tag,  "last: " + lastView.getBottom() + "\n" +
+							"view: " + DDListView.this.getHeight() + "\n" + 
+							"--: " + DDListView.this.getDividerHeight());
+					/**/
+					if (lastView != null && (outBound || 
+						((lastView.getBottom() + 8) >= GridHeight && distanceY > 0))) {
+						
+						distance = firstOut - (int) e2.getRawY();
+						scrollTo(0, distance);
+						return true;
+					}
+
+					
+					//在下面
+					/**
+					if (outBound || (lastPos == itemCount &&
+							lastView.get))
+							/**/
+					return false;
+				}
+				
+				@Override
+				public void onLongPress(MotionEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+						float velocityY) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+				
+				@Override
+				public boolean onDown(MotionEvent e) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+			});
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent event){
+		if (!spring) return super.dispatchTouchEvent(event);
+		if (dragging)
+			return super.dispatchTouchEvent(event);
+		
+		int act = event.getAction();
+		if ((act == MotionEvent.ACTION_UP || act == MotionEvent.ACTION_CANCEL) 
+				&& outBound) {
+			outBound = false;
+			/**/
+			// 弹性恢复位置
+			Rect rect = new Rect();
+			getLocalVisibleRect(rect);
+			TranslateAnimation am = new TranslateAnimation( 0, 0, -rect.top, 0);
+			am.setDuration(300);
+			startAnimation(am);
+			/**/
+			scrollTo(0, 0);
+			//DDListView.this.computeScroll();
+			
+			//
+		}
+		if (!mGestureDetector.onTouchEvent(event)) {
+			outBound = false;
+		} else {
+			outBound = true;
+		}
+		return super.dispatchTouchEvent(event);
+	}
 
 	/**/
 	@Override

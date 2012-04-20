@@ -10,15 +10,18 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.TranslateAnimation;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -31,6 +34,8 @@ import com.xjf.filedialog.DDListView.StartDragListener;
  * */
 public class DDGridView extends GridView{
 
+	private final static boolean sping = true;
+	
 	public final static String tag = "FileDialog";
 	
 	private Context context;
@@ -140,6 +145,136 @@ public class DDGridView extends GridView{
 		//startDrag(bm, (int) event.getRawX(), (int) event.getRawY());
 		startDragListener.startDrag(position);
 	}
+	
+
+	//private View parentView;
+	private boolean outBound = false;
+	private int distance, firstOut;
+	GestureDetector mGestureDetector = new GestureDetector(context, 
+			new GestureDetector.OnGestureListener() {
+				
+				@Override
+				public boolean onSingleTapUp(MotionEvent e) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+				
+				@Override
+				public void onShowPress(MotionEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+						float distanceY) {
+					// TODO Auto-generated method stub
+					/**
+					if (parentView == null){
+						return false;
+					}/**/
+					/**
+					 *  弹性的实现, 主要用scrollTo(int x, int y)方法移动listView
+					 *  根据点击位置离listView的距离,不断地用scrollTo调整listView的位置.
+					 */
+					int firstPos = getFirstVisiblePosition();
+					int lastPos = getLastVisiblePosition();
+					int itemCount = getCount();
+
+					if (outBound && firstPos != 0
+							&& lastPos != (itemCount - 1)) {
+						scrollTo(0, 0);
+						//DDGridView.this.computeScroll();
+						return false;
+					}
+					View firstView = getChildAt(firstPos);
+					
+					if (!outBound)
+						firstOut = (int) e2.getRawY();
+					//在上面
+					if (firstView != null && 
+						(outBound || (firstPos == 0 && firstView.getTop() == 0 && distanceY < 0))){
+						distance = firstOut - (int) e2.getRawY();
+						scrollTo(0, distance);
+						outBound = true;
+						return true;
+					} else {
+					}
+
+
+					View lastView = getChildAt(lastPos - firstPos);
+					if (lastPos != (itemCount - 1))
+						return false;
+					int GridHeight = getHeight();
+					if (lastView != null && (outBound || 
+						(lastView.getBottom() == GridHeight && distanceY > 0))) {
+						distance = firstOut - (int) e2.getRawY();
+						scrollTo(0, distance);
+						outBound = true;
+						return true;
+					}
+
+					
+					//在下面
+					/**
+					if (outBound || (lastPos == itemCount &&
+							lastView.get))
+							/**/
+					return false;
+				}
+				
+				@Override
+				public void onLongPress(MotionEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+						float velocityY) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+				
+				@Override
+				public boolean onDown(MotionEvent e) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+			});
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent event){
+		if (!sping)
+			return super.dispatchTouchEvent(event);
+		if (dragging)
+			return super.dispatchTouchEvent(event);
+		int act = event.getAction();
+		/**/
+		if ((act == MotionEvent.ACTION_UP || act == MotionEvent.ACTION_CANCEL) 
+				&& outBound) {	
+			//DDGridView.this.computeScroll();
+			reback();
+		}
+		/**/
+		if (!mGestureDetector.onTouchEvent(event)) {
+			outBound = false;
+		} else {
+		}
+		return super.dispatchTouchEvent(event);
+	}
+	public boolean isOutBound() {return outBound;}
+	public void reback() {
+		outBound = false;
+		/**/
+		Rect rect = new Rect();
+		getLocalVisibleRect(rect);
+		TranslateAnimation am = new TranslateAnimation( 0, 0, -rect.top, 0);
+		am.setDuration(300);
+		startAnimation(am);
+		/**/
+		scrollTo(0, 0);	
+	}
+	
 	/**/
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent event) {
