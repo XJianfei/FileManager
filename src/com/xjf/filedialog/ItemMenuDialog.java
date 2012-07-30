@@ -90,7 +90,7 @@ public class ItemMenuDialog extends Dialog implements DialogInterface {
 			tv.setId(clickId[i] + ID_OFFSET);
 		}
 	}
-		/***/
+	/***/
 	public boolean onTouchEvent(MotionEvent event){
 		if (height < 0)
 			height = layout.getHeight();

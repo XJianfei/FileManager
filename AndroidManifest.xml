@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.xjf.filedialog" android:versionName="1.71" android:versionCode="711">
+	package="com.xjf.filedialog" android:versionName="1.72.1" android:versionCode="712">
 	<!-- android:theme="@android:style/Theme.Dialog" 
 		android:screenOrientation="portrait" 
 		-->
@@ -36,6 +36,6 @@
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
 	<uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
-	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="8"></uses-sdk>
+	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="16"></uses-sdk>
 
 </manifest> 

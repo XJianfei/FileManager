@@ -671,14 +671,17 @@ public class FileListAdapter extends BaseAdapter
 		@Override
 		public int compareTo(FileInfo another) {
 			// TODO Auto-generated method stub
+			String a,b;
+			a = this.name.toLowerCase();
+			b = another.name.toLowerCase();
 			if (another.directory) {
 				if (!directory)
 					return 1;
-				return this.name.compareTo(another.name);
+				return a.compareTo(b);
 			}
 			if (directory)
 				return -1;
-			return this.name.compareTo(another.name);
+			return a.compareTo(b);
 		}
 		
 	

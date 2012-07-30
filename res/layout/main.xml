@@ -31,8 +31,8 @@
 		android:layout_alignParentRight="true" android:layout_below="@id/tab" />
 	<com.xjf.filedialog.HorizontalListView android:id="@+id/pathgallery" android:layout_width="fill_parent"
 		android:layout_below="@id/tab" android:layout_toLeftOf="@id/mount"
-		android:layout_height="40dp" android:background="@drawable/pathbg">
-	</com.xjf.filedialog.HorizontalListView>
+		android:layout_height="40dp" android:background="@drawable/pathbg"
+		android:longClickable="true" android:focusable="true" />
 
 	<LinearLayout android:id="@+id/searchlayout"
 		android:layout_width="fill_parent" android:visibility="invisible"
@@ -40,6 +40,7 @@
 		android:layout_gravity="center_vertical" android:background="@drawable/pathbg">
 		<ImageButton android:id="@+id/searchclose"
 			android:layout_width="40dp" android:layout_height="40dp"
+			android:contentDescription="close search"
 			android:background="@drawable/searchstop"></ImageButton>
 		<ProgressBar android:id="@+id/searchbar"
 			android:layout_width="35dp" android:layout_height="35dp"></ProgressBar>
@@ -54,24 +55,30 @@
 		android:background="@drawable/optbg" android:layout_height="wrap_content"
 		android:gravity="center_vertical" android:layout_alignParentBottom="true">
 		<ImageView android:id="@+id/opttag" android:layout_height="35dp"
+			android:focusable="true"
 			android:layout_width="35dp" android:layout_weight="1"
 			android:gravity="center_vertical" android:src="@drawable/tag_show" />
 		<ImageView android:id="@+id/optup" android:layout_height="35dp"
+			android:focusable="true"
 			android:layout_width="35dp" android:layout_weight="1"
 			android:gravity="center_vertical" android:src="@drawable/up" />
 		<ImageView android:id="@+id/opthistory"
 			android:layout_height="35dp" android:layout_width="35dp"
+			android:focusable="true"
 			android:layout_weight="1" android:gravity="center_vertical"
 			android:src="@drawable/history" />
 		<ImageView android:id="@+id/optmultfile"
 			android:layout_height="35dp" android:layout_width="35dp"
+			android:focusable="true"
 			android:layout_weight="1" android:gravity="center_vertical"
 			android:src="@drawable/multfile" />
 		<ImageView android:id="@+id/optrefresh"
 			android:layout_height="35dp" android:layout_width="35dp"
+			android:focusable="true"
 			android:layout_weight="1" android:gravity="center_vertical"
 			android:src="@drawable/refresh" />
 		<ImageView android:id="@+id/optmenu" android:layout_height="35dp"
+			android:focusable="true"
 			android:layout_width="35dp" android:layout_weight="1"
 			android:gravity="center_vertical" android:src="@drawable/menu" />
 	</LinearLayout>
@@ -83,7 +90,7 @@
 		<EditText android:id="@+id/selectededit"
 			android:layout_width="200dp" android:singleLine="true"
 			android:layout_weight="7" android:layout_height="fill_parent"></EditText>
-		<Button android:id="@+id/selectedbtn" android:text="确定"
+		<Button android:id="@+id/selectedbtn" android:text="@string/ok"
 			android:layout_weight="3" android:layout_width="wrap_content"
 			android:layout_height="fill_parent"></Button>
 	</LinearLayout>

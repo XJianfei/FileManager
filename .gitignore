@@ -1,4 +1,5 @@
 *.apk
 *.class
 .classpath
+*.dex
 bin/

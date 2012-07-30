@@ -14,8 +14,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -116,7 +121,7 @@ public class FileManager extends Activity {
 	
 	public final static String PREFERENCE = "filedilaog";
 	public String SDCARD_PATH ;
-	public final String BACKUPUP_DIR = SDCARD_PATH + "/panda";
+	public String BACKUPUP_DIR; // = SDCARD_PATH + "/panda";
 	//private String currentPath = "/sdcard";
 	
 //	private int dragId = -1;
@@ -150,7 +155,7 @@ public class FileManager extends Activity {
 	int preViewStyle = FileListAdapter.STYLE_GRID;
 	boolean preHideFile = false;
 	boolean preHideTag = false;
-	String preBackupDir = BACKUPUP_DIR;
+	String preBackupDir;// = BACKUPUP_DIR;
 	boolean preShowFileSize = true;
 	boolean preShowFileDate = true;
 
@@ -327,7 +332,7 @@ public class FileManager extends Activity {
 	//private boolean mountV = false;
 
 	public final static boolean D = true;
-	public final static String tag = "FileDialog";
+	public final static String tag = "FileManager";
 	public static final void dbgf(String tag, String msg) {
 		if (D) {
 			Log.d(tag, msg);
@@ -360,6 +365,9 @@ public class FileManager extends Activity {
         ok = getString(R.string.ok);
         cancel = getString(R.string.cancel);
         SDCARD_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
+		BACKUPUP_DIR = SDCARD_PATH + "/panda";
+		preBackupDir = BACKUPUP_DIR;
+
 
         String act = getIntent().getAction();
         if (!act.equals(Intent.ACTION_MAIN)) {
@@ -377,6 +385,7 @@ public class FileManager extends Activity {
         fileLibDialog = new FileLibDialog(this, parentList, childList);
         
         //从xml里获取View
+
         findView();
         setupToolbar();
         
@@ -723,7 +732,6 @@ public class FileManager extends Activity {
 
 		String path = clickInfo.path();
 		
-
 		if (selectedAction) {
 			switch (selectedAct) {
 			case GET_DIRECTORY:
@@ -772,6 +780,11 @@ public class FileManager extends Activity {
 				return;
 			}
 			int pa = pathAdapter.getAbsolutePath().indexOf(path);
+			if (dirsIndexHistory.size() >= 10
+					&& !dirsIndexHistory.containsKey(currentPath())) {
+				dirsIndexHistory.remove(dirsHistory.remove(0));
+			} 
+			dirsIndexHistory.put(currentPath(), fileView.getFirstVisiblePosition());
 			refreshPath(path, pa != 0);
 			if (pa == 0){
 				pathAdapter.setCurrentPosition(path.split("/").length - 1);
@@ -1168,12 +1181,61 @@ public class FileManager extends Activity {
     /**/
     
 	private String[] pathBarString = new String[]{"/", "sdcard"};
+	private OnLongClickListener pathLongClickListener = new OnLongClickListener() {
+		
+		@Override
+		public boolean onLongClick(View v) {
+			// TODO Auto-generated method stub
+			dbg("path on long click");
+			final EditText pEdit = new EditText(FileManager.this);
+			pEdit.setText(currentPath());
+			XDialog.createInputDialog(FileManager.this, null, pEdit)
+				.setTitle(getString(R.string.path))
+				.setPositiveButton(ok, new AlertDialog.OnClickListener(){
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						File f = new File(pEdit.getText().toString());
+						if (!f.exists()){
+							Toast.makeText(FileManager.this, 
+									getString(R.string.the_input_path_error_or_not_exsit), 
+									Toast.LENGTH_LONG).show();
+							return;
+						}
+						refreshPath(pEdit.getText().toString(), true);
+					}
+				}).setNegativeButton(cancel, new AlertDialog.OnClickListener(){
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						// do nothing
+					}
+				}).create().show();
+			return true;
+		}
+	};
+	private com.xjf.filedialog.HorizontalListView.OnItemClickListener pathItemClickListener = new HorizontalListView.OnItemClickListener() {
+
+		@Override
+		public void onItemClick(View view, int position) {
+	    	String path = pathAdapter.getPath(position);
+	    	if (currentPath().equals(path))
+	    		return;
+			refreshPath(path, false);
+			pathScroll.setSelection(position);
+			//pathAdapter.refreshPath(currentPath());
+		}
+	};
     private void initFilePathGallery() {
     	/*file path*/
         pathAdapter = new TextGalleryAdapter(this, pathBarString, pathScroll,
         		pathScroll.getDataChangedListener());
+        //pathAdapter.setItemLongClickListener(pathLongClickListener);
         pathScroll.setAdapter(pathAdapter);
         pathScroll.setSelection(pathAdapter.getCount() - 1);
+        pathScroll.setOnLongClickListener(pathLongClickListener);
         pathScroll.setOnItemClickListener(new HorizontalListView.OnItemClickListener() {
 
 			@Override
@@ -1184,40 +1246,6 @@ public class FileManager extends Activity {
 				refreshPath(path, false);
 				pathScroll.setSelection(position);
 				//pathAdapter.refreshPath(currentPath());
-			}
-		});
-        pathScroll.setOnLongClickListener(new OnLongClickListener() {
-			
-			@Override
-			public boolean onLongClick(View v) {
-				// TODO Auto-generated method stub
-				final EditText pEdit = new EditText(FileManager.this);
-				pEdit.setText(currentPath());
-				XDialog.createInputDialog(FileManager.this, null, pEdit)
-					.setTitle(getString(R.string.path))
-					.setPositiveButton(ok, new AlertDialog.OnClickListener(){
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// TODO Auto-generated method stub
-							File f = new File(pEdit.getText().toString());
-							if (!f.exists()){
-								Toast.makeText(FileManager.this, 
-										getString(R.string.the_input_path_error_or_not_exsit), 
-										Toast.LENGTH_LONG).show();
-								return;
-							}
-							refreshPath(pEdit.getText().toString(), true);
-						}
-					}).setNegativeButton(cancel, new AlertDialog.OnClickListener(){
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// TODO Auto-generated method stub
-							// do nothing
-						}
-					}).create().show();
-				return true;
 			}
 		});
     }
@@ -1772,7 +1800,11 @@ public class FileManager extends Activity {
 			p.destroy();
 		}
     }
-    private int previouSelected = 0;
+    
+    private LinkedHashMap<String, Integer> dirsIndexHistory = new LinkedHashMap<String, Integer>();
+    private ArrayList<String> dirsHistory = new ArrayList<String>();
+    
+    
     /**
      * 刷新当前目录的内容,
      * @param
@@ -1785,17 +1817,14 @@ public class FileManager extends Activity {
     		Toast.makeText(this, "" + path + " 不存在", Toast.LENGTH_SHORT).show();
     		return;
     	}
-    	int s = 0;
-    	previouSelected = fileView.getFirstVisiblePosition();
+    	String p = currentData.path;
     	if (currentData.searchingTag)
     		return;
+
     	if (!historyString.contains(path))
     		historyString.add(path);
     	if (historyString.size() > MAX_PATH_TEMP){
     		historyString.remove(0);
-    	}
-    	if (gallery) {
-    		s = 0;
     	}
 
     	clearFileSlected();
@@ -1808,7 +1837,10 @@ public class FileManager extends Activity {
     	
         findFileInfo(path, fInfos);
 		fileAdapter.notifyDataSetChanged();
-		fileView.setSelection(s);
+	   	if (!p.equals(path) && dirsIndexHistory.containsKey(path)) {
+	   		int index = dirsIndexHistory.get(path);
+			fileView.setSelection(index);
+    	}
 		if (gallery){
 			refreshTextPath();
 		}
@@ -1824,6 +1856,7 @@ public class FileManager extends Activity {
 		if (mountBtn.getVisibility() == View.VISIBLE) {
 			hideMount();
 		} 
+
     }
     public String getCurrentDirPerm() {
     	if (mounts.index == -1)

@@ -1300,7 +1300,8 @@ public class FileItemClickListener {
 		/**/
 		/***/
 		Intent intent = new Intent(Intent.ACTION_VIEW);
-		Uri uri = Uri.parse("file://" + file); 
+		Uri uri = Uri.parse("file://" + "xxx" + file.substring(file.lastIndexOf('.'))),
+				ouri = Uri.parse("file://" + file); 
 		String type = null;
 		type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
 						MimeTypeMap.getFileExtensionFromUrl(file));
@@ -1318,7 +1319,7 @@ public class FileItemClickListener {
 		if(type != null){
 			//intent.setType(type);
 			if (FileManager.D) Log.d(tag, type);
-			intent.setDataAndType(uri, type);
+			intent.setDataAndType(ouri, type);
 			try {
 				fileManager.startActivityForResult(intent, 1);
 			} catch (ActivityNotFoundException e){
